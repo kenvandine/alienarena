@@ -104,7 +104,7 @@ Send an impulse number to the game.
 
 **bind** `<key> [command]`
 
-Bind a command to a key. Without a command, shows the current binding. Example: `bind mouse1 +attack`
+Bind a command to a key. Without a command, shows the current binding. Example: `bind mouse1 +attack`. Game controller buttons are keys too, from `PAD_A` to `PAD_TOUCHPAD` (listed under Controller CVARs in CVAR.md): `bind PAD_RT +attack`
 
 **unbind** `<key>`
 

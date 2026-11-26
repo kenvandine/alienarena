@@ -41,6 +41,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ref_gl/r_local.h"
 #include "client/keys.h"
 #include "unix/glw_unix.h"
+#ifdef HAVE_SDL2
+#include "client/in_pad.h"
+#endif
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -96,7 +99,7 @@ qboolean have_stencil = false; // Stencil shadows - MrG
 		    PointerMotionMask | ButtonMotionMask )
 
 #define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | \
-	       	StructureNotifyMask | PropertyChangeMask )
+	       	StructureNotifyMask | PropertyChangeMask | FocusChangeMask )
 
 extern cvar_t	*vid_xpos;
 extern cvar_t	*vid_ypos;
@@ -694,6 +697,19 @@ void HandleEvents( void )
 		case ClientMessage:
 			if ( event.xclient.data.l[0] == wmDeleteWindow )
 				Cbuf_ExecuteText( EXEC_NOW, "quit" );
+			break;
+
+		case FocusIn:
+		case FocusOut:
+#ifdef HAVE_SDL2
+			// grabbing the keyboard for the mouse moves the focus too, and
+			// where the pointer is doesn't matter
+			if ( event.xfocus.mode == NotifyGrab || event.xfocus.mode == NotifyUngrab ||
+				event.xfocus.detail == NotifyInferior || event.xfocus.detail == NotifyPointer )
+				break;
+			// pads are read whatever has the focus, so stop them while away
+			IN_Pad_Focus( event.type == FocusIn );
+#endif
 			break;
 		}
 	}

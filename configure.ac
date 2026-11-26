@@ -336,6 +336,33 @@ AS_IF([ test "x${with_zlib}" != xno ],[
 	])
 ])
 
+dnl ---- SDL2 (client)
+dnl Game controllers, through SDL2's GameController API. Input only: the
+dnl window and the video code don't use SDL.
+dnl
+dnl If no option is specified, then check for the library and act accordingly.
+dnl If "--without-sdl2" is specified, do not check, and disable the library.
+dnl If "--with-sdl2" is specified, check and fail if it cannot be found.
+dnl
+AC_ARG_WITH([sdl2],
+	[AS_HELP_STRING([--with(out)-sdl2],
+			[include game controller support with SDL2 (default: check)])],
+	[],
+	[with_sdl2=check])
+have_sdl2=no
+AS_IF([ test "x${with_sdl2}" != xno ],[
+	PKG_CHECK_MODULES([SDL2],[sdl2 >= 2.0.10],[
+		have_sdl2=yes
+		AC_DEFINE([HAVE_SDL2],1,[Enable game controller support with SDL2])
+	],[
+		have_sdl2=no
+		AS_IF([ test "x${with_sdl2}" = xyes ],[
+			AC_MSG_FAILURE(
+				[--with-sdl2 specified, library or headers not found])
+		])
+	])
+])
+
 dnl ---- libjpeg (client)
 AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,[
 	AC_MSG_ERROR([required jpeg library not found])
@@ -473,6 +500,7 @@ AS_IF([ test "x$system_libode" = "xyes"],[
 ])
 
 AM_CONDITIONAL([USE_SYSTEM_LIBODE],[ test "x$system_libode" = "xyes" ])
+AM_CONDITIONAL([USE_SDL2],[ test "x${have_sdl2}" = xyes ])
 
 dnl
 dnl ------------------------ end of client-only header requirements
@@ -562,6 +590,7 @@ AS_IF([ test "x${hide_status}" = xno ],[
 		AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
 		AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
 		AS_ECHO([" Zlib support: .......... ${have_zlib}"])
+		AS_ECHO([" Game controllers: ...... ${have_sdl2}"])
 		AS_IF([ test "x${unix_host}" = xdarwin ],[
 			AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
 			])

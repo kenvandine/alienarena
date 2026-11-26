@@ -912,6 +912,10 @@ void Key_Event (int key, qboolean down, unsigned time)
 	char	*kb;
 	char	cmd[1024];
 
+	// a game controller's start button is a second escape key
+	if (key == K_PAD_START)
+		key = K_ESCAPE;
+
 	// update auto-repeat status
 	if (down)
 	{

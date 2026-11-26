@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client/client.h"
+#ifdef HAVE_SDL2
+#include "client/in_pad.h"
+#endif
 
 
 cvar_t	*in_mouse;
@@ -46,10 +49,18 @@ void IN_Init(void)
 	mouse_available = true;
 
 	refreshCursorLink();
+
+#ifdef HAVE_SDL2
+	IN_Pad_Init ();
+#endif
 }
 
 void IN_Shutdown(void)
 {
+#ifdef HAVE_SDL2
+	IN_Pad_Shutdown ();
+#endif
+
 	if (!mouse_available)
 		return;
 
@@ -69,6 +80,9 @@ IN_Commands
 */
 void IN_Commands (void)
 {
+#ifdef HAVE_SDL2
+	IN_Pad_Commands ();
+#endif
 }
 
 
@@ -87,5 +101,7 @@ void IN_Frame (void)
 
 void IN_JoyMove (usercmd_t *cmd)
 {
-	// No joystick support for Linux
+#ifdef HAVE_SDL2
+	IN_Pad_Move (cmd);
+#endif
 }

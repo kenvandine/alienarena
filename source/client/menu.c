@@ -7373,6 +7373,26 @@ void M_Draw (void)
 	M_Draw_Cursor();
 }
 
+// game controllers use the menus through the keys they already know,
+// except while a binding screen waits for a button
+static int M_TranslatePadKey (int key)
+{
+	if (bind_grab)
+		return key;
+
+	switch (key)
+	{
+	case K_PAD_A:		return K_ENTER;
+	case K_PAD_B:		return K_ESCAPE;
+	case K_PAD_X:		return K_BACKSPACE;
+	case K_PAD_UP:		return K_UPARROW;
+	case K_PAD_DOWN:	return K_DOWNARROW;
+	case K_PAD_LEFT:	return K_LEFTARROW;
+	case K_PAD_RIGHT:	return K_RIGHTARROW;
+	}
+	return key;
+}
+
 // send key presses to the appropriate menu
 void M_Keydown (int key)
 {
@@ -7380,6 +7400,8 @@ void M_Keydown (int key)
 	
 	if (mstate.state != mstate_steady)
 		return;
+
+	key = M_TranslatePadKey (key);
 	
 	if (key == K_ESCAPE && mstate.active.num_layers > 0)
 	{

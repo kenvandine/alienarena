@@ -68,13 +68,14 @@ dependencies.
   * JPEG        (libjpeg8-dev, libjpeg8)
   * ZLib        (libz, libz-dev)
   * ODE         (libode, libode-dev)
+  * SDL2        (libsdl2-dev, libSDL2), optional, for game controllers
 
 For Debian-based distributions (such as Ubuntu and Mint), this command
 should get all of what you need. Enter it all on one command line.
 
   $ sudo apt-get install build-essentials libx11-dev libxxf86vm-dev \
     libgl1-mesa-dev libopenal-dev libogg-dev libvorbis-dev \ 
-    libcurl4-gnutls-dev libfreetype6-dev libjpeg8-dev libode-dev
+    libcurl4-gnutls-dev libfreetype6-dev libjpeg8-dev libode-dev libsdl2-dev
 
 3. Building and Installing
 

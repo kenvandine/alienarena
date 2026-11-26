@@ -227,6 +227,14 @@ alienarena_SOURCES = \
 	unix/sys_unix.c \
 	unix/vid_so.c
 
+if USE_SDL2
+alienarena_SOURCES += \
+	client/in_pad.c \
+	client/in_pad.h
+alienarena_CFLAGS += $(SDL2_CFLAGS)
+alienarena_LDADD += $(SDL2_LIBS)
+endif
+
 
 # Dedicated Server
 alienarena_ded_SOURCES = \

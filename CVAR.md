@@ -766,6 +766,50 @@ Joystick pitch and yaw dead zones.
 
 Look-spring tuning.
 
+### Controller CVARs
+
+Game controllers on Linux, read with SDL2 when the game is built with it (`--with-sdl2`). Buttons and triggers are keys named `PAD_A`, `PAD_B`, `PAD_X`, `PAD_Y`, `PAD_LB`, `PAD_RB`, `PAD_LT`, `PAD_RT`, `PAD_BACK`, `PAD_START`, `PAD_GUIDE`, `PAD_LSTICK`, `PAD_RSTICK`, `PAD_UP`, `PAD_DOWN`, `PAD_LEFT`, `PAD_RIGHT`, `PAD_MISC`, `PAD_PADDLE1` to `PAD_PADDLE4` and `PAD_TOUCHPAD`, bound with `bind` like any other key. `PAD_START` works like Escape and can't be rebound. The left stick moves and the right stick looks. To fix the layout of an unusual controller, put an SDL mapping file named `gamecontrollerdb.txt` in your game folder.
+
+**in_gamepad**: BOOL (default: 1)
+
+Use game controllers.
+
+**pad_sensitivity**: FLOAT (default: 1)
+
+Controller look speed multiplier.
+
+**pad_yawspeed**: FLOAT (default: 220)
+
+Degrees per second the right stick turns at full tilt.
+
+**pad_pitchspeed**: FLOAT (default: 160)
+
+Degrees per second the right stick looks up or down at full tilt.
+
+**pad_invert**: BOOL (default: 0)
+
+Invert looking up and down with the right stick.
+
+**pad_lookexpo**: FLOAT (default: 2)
+
+Right stick response curve. 1 is linear; higher values aim more finely near the middle and turn as fast at full tilt.
+
+**pad_deadzone_move**, **pad_deadzone_look**: FLOAT (default: 0.20, 0.15)
+
+Left and right stick deadzones, from 0 to 0.9.
+
+**pad_movesnap**: FLOAT (default: 0.25)
+
+Move straight along one axis when the left stick's other axis is this small in comparison, so that double flicks dodge.
+
+**pad_trigger**: FLOAT (default: 0.30)
+
+How far a trigger goes down before it counts as pressed.
+
+**pad_debug**: BOOL (default: 0)
+
+Print the sticks and the moves they make.
+
 ### Debug CVARs (client)
 
 **cl_stats**, **cl_testblend**, **cl_testentities**, **cl_testlights**, **cl_testparticles**: BOOL (default: 0)
