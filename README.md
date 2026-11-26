@@ -36,8 +36,10 @@ whenever stack.txt changes, and when you run it from the Actions tab.
 5. Builds `master`, every branch and the release build (each branch twice,
    with and without SDL2, once configure has `--with-sdl2`), and smoke tests
    each: the dedicated server loads dm-deathray, and the client starts under
-   Xvfb, gets into the map and draws it. Screenshots and logs are kept with
-   the run for 14 days.
+   Xvfb, gets into the map and draws it. A client built with SDL2 also gets a
+   virtual controller (SDL's virtual joystick, from `fork/vpad.c`), and has
+   to see its Y button and move with its left stick. Screenshots and logs are
+   kept with the run for 14 days.
 6. If everything passed, pushes the branches that changed and the new
    `<release>-pad.N` tag in one go. If anything failed, it pushes nothing (but
    `master`) and opens an issue, **Fork sync stopped**, saying what and where.
@@ -179,7 +181,8 @@ runs it and shellcheck on every change to this branch.
 
 ## What isn't tested
 
-The Windows build (Visual Studio), the Steam build, and real controller input:
-the smoke test proves the game starts, loads a map and draws it with the patches
-in, not that a pad moves you around. Try a release build with a pad before
-pointing players at it.
+The Windows build (Visual Studio), the Steam build, and real controllers: the
+smoke test proves the game starts, loads a map, draws it, and takes a button
+and a stick from a virtual controller, not that every pad's layout, hotplug or
+the window's focus work. Try a release build with a real pad before pointing
+players at it.

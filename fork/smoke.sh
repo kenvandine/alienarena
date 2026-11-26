@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Smoke tests a build: the dedicated server loads a map, then the client starts
-# under Xvfb, gets into the same map, keeps running and draws it. Logs and a
-# screenshot go to OUT.
+# under Xvfb, gets into the same map, keeps running and draws it. A client built
+# with SDL2 also gets a virtual controller (fork/vpad.c), whose Y button and
+# left stick it has to see. Logs and a screenshot go to OUT.
 #
 #   fork/smoke.sh BINDIR SOURCE DATA OUT
 #
@@ -92,13 +93,35 @@ for _ in $(seq 50); do [ -s "$game/display" ] && break; sleep 0.2; done
 DISPLAY=":$(head -n 1 "$game/display")"
 export DISPLAY
 
+# With SDL2 in the build, a virtual controller presses Y and pushes the left
+# stick forward once the client is in the map.
+pad=
+client_env=()
+# shellcheck disable=SC2046 # pkg-config prints several flags
+if ldd "$bin/alienarena" | grep -q libSDL2 &&
+	cc -shared -fPIC -o "$game/vpad.so" "$here/vpad.c" $(pkg-config --cflags --libs sdl2) -ldl \
+		>"$out/vpad-build.log" 2>&1; then
+	pad=yes
+	mkdir -p "$game/home/cor-games/arena"
+	printf 'set pad_debug 1\nbind PAD_Y "echo virtual pad: Y"\n' >"$game/home/cor-games/arena/autoexec.cfg"
+	printf '0 button 3 1\n200 button 3 0\n500 axis 1 -32767\n3000 axis 1 0\n' >"$game/vpad.txt"
+	client_env=(env "LD_PRELOAD=$game/vpad.so" "VPAD_SCRIPT=$game/vpad.txt" "VPAD_GO=$game/go")
+fi
+
 # shellcheck disable=SC2086 # SMOKE_CLIENT_ARGS is several words
-start "$out/client.log" "$bin/alienarena" +set vid_fullscreen 0 +set gl_mode -1 \
+start "$out/client.log" "${client_env[@]}" "$bin/alienarena" +set vid_fullscreen 0 +set gl_mode -1 \
 	+set vid_width 1280 +set vid_height 720 +set s_initsound 0 +set allow_download 0 \
 	${SMOKE_CLIENT_ARGS:-} +map "$map"
 client=$PID
 wait_for "$out/client.log" "$client" "$load_secs" 'entered the game' ||
 	failed "$out/client.log" "the client didn't get into $map"
+if [ -n "$pad" ]; then
+	touch "$game/go"
+	wait_for "$out/client.log" "$client" 30 'virtual pad: Y' ||
+		failed "$out/client.log" "the client didn't take the virtual controller's Y button"
+	wait_for "$out/client.log" "$client" 30 'pad: move 0\.00 1\.00' ||
+		failed "$out/client.log" "the client didn't move with the virtual controller's left stick"
+fi
 sleep "$settle_secs"
 kill -0 "$client" 2>/dev/null || failed "$out/client.log" "the client quit or crashed after loading $map"
 import -display "$DISPLAY" -window root "$out/client.png"
@@ -106,4 +129,4 @@ light=$(convert "$out/client.png" -colorspace Gray -format '%[fx:mean]' info:)
 awk -v l="$light" 'BEGIN { exit !(l > 0.03) }' ||
 	failed "$out/client.log" "the client's screen is blank (mean brightness $light)"
 stop "$client"
-echo "the dedicated server loaded $map and the client played it (screen brightness $light)"
+echo "the dedicated server loaded $map and the client played it${pad:+ with a virtual controller} (screen brightness $light)"
