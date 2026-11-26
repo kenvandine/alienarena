@@ -1,0 +1,102 @@
+# Keeps the fork current with upstream Alien Arena and the controller patches
+# on top of it, every day. See README.md.
+name: Sync with upstream
+
+on:
+  schedule:
+    - cron: "17 9 * * *" # every day at 09:17 UTC
+  push:
+    branches: [fork-tools]
+    paths: [stack.txt]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Do and test everything, but push nothing
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # master, the pad branches and the release tags
+  issues: write # reporting what needs a hand
+  actions: write # keeping the daily run switched on
+
+concurrency:
+  group: fork-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      WORK: ${{ github.workspace }}/work
+    steps:
+      - name: Check out the tools
+        uses: actions/checkout@v4
+        with:
+          path: tools
+
+      - name: Install what the build and the smoke test need
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            build-essential pkg-config libx11-dev libxxf86vm-dev libgl-dev \
+            libjpeg-dev libopenal-dev libcurl4-openssl-dev libogg-dev libvorbis-dev \
+            libfreetype-dev zlib1g-dev libsdl2-dev \
+            xvfb xauth imagemagick libgl1-mesa-dri
+
+      - name: Sync
+        id: sync
+        env:
+          # A token with the Workflows permission is only needed if upstream
+          # ever changes files in .github/workflows (README.md, "Setting up").
+          TOKEN: ${{ secrets.FORK_SYNC_TOKEN || github.token }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          TEST: ${{ github.event_name == 'workflow_dispatch' && 'always' || 'auto' }}
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          export FORK_URL="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          tools/fork/sync.sh
+
+      - name: Report
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTCOME: ${{ steps.sync.outcome }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ ! -s "$WORK/summary.md" ]; then
+            mkdir -p "$WORK"
+            printf 'The sync stopped before it wrote a report.\n\nRun: %s\n\n<!-- signature: no-report -->\n' "$run_url" >"$WORK/summary.md"
+          fi
+          cat "$WORK/summary.md" >>"$GITHUB_STEP_SUMMARY"
+          [ "$DRY_RUN" = 1 ] && exit 0
+          if [ "$OUTCOME" = failure ]; then
+            tools/fork/issue.sh open "Fork sync stopped" "$WORK/summary.md" || echo "::warning::Couldn't open an issue. Are issues switched on?"
+          elif [ "$OUTCOME" = success ]; then
+            tools/fork/issue.sh close "Fork sync stopped" "Sorted: the sync ran clean ($run_url)." || true
+          fi
+          for note in "$WORK"/notices/*.md; do
+            [ -e "$note" ] || continue
+            tail -n +3 "$note" >"$note.body"
+            tools/fork/issue.sh open "$(head -n 1 "$note")" "$note.body" || true
+          done
+
+      - name: Keep the logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-${{ github.run_id }}
+          path: ${{ github.workspace }}/work/out
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Keep the daily run switched on
+        # GitHub turns off scheduled workflows in repositories with no
+        # activity for 60 days; enabling it again resets that.
+        if: always() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/sync.yml/enable" || true

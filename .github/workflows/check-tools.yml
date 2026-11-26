@@ -1,0 +1,23 @@
+# Checks changes to the sync tools themselves.
+name: Check the tools
+
+on:
+  push:
+    branches: [fork-tools]
+    paths: ["fork/**", ".github/workflows/**"]
+  pull_request:
+    branches: [fork-tools]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shellcheck
+        run: shellcheck -x fork/*.sh
+      - name: Self test
+        run: fork/selftest.sh

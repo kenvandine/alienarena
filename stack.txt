@@ -1,0 +1,8 @@
+# The controller patch stack, bottom first: one branch per upstream pull
+# request, each built on the one above it (the first on master). The sync job
+# replays them in this order. Add a branch once it's pushed to the fork;
+# take it out once upstream has merged it.
+#
+# pad/1-keys
+# pad/2-linux
+# pad/3-menus
