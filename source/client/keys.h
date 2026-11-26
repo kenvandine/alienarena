@@ -135,8 +135,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define K_MWHEELDOWN	239
 #define K_MWHEELUP		240
 
-extern char		*keybindings[256];
-extern	int		key_repeats[256];
+//
+// game controller buttons, numbered above 255 so they never clash with the
+// Latin-1 characters that keyboards with other layouts send
+//
+#define K_PAD_A			256
+#define K_PAD_B			257
+#define K_PAD_X			258
+#define K_PAD_Y			259
+#define K_PAD_BACK		260
+#define K_PAD_GUIDE		261
+#define K_PAD_START		262
+#define K_PAD_LSTICK	263
+#define K_PAD_RSTICK	264
+#define K_PAD_LB		265
+#define K_PAD_RB		266
+#define K_PAD_UP		267
+#define K_PAD_DOWN		268
+#define K_PAD_LEFT		269
+#define K_PAD_RIGHT		270
+#define K_PAD_MISC		271
+#define K_PAD_PADDLE1	272
+#define K_PAD_PADDLE2	273
+#define K_PAD_PADDLE3	274
+#define K_PAD_PADDLE4	275
+#define K_PAD_TOUCHPAD	276
+#define K_PAD_LT		277
+#define K_PAD_RT		278
+
+#define K_MAX_KEYS		512
+
+extern char		*keybindings[K_MAX_KEYS];
+extern	int		key_repeats[K_MAX_KEYS];
 
 extern	int	anykeydown;
 extern char chat_buffer[];

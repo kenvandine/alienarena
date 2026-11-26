@@ -39,12 +39,12 @@ int	anykeydown;
 int		edit_line=0;
 int		history_line=0;
 
-char	*keybindings[256];
-qboolean	consolekeys[256];	// if true, can't be rebound while in console
-qboolean	menubound[256];	// if true, can't be rebound while in menu
-int		keyshift[256];		// key to map to if shift held down in console
-int		key_repeats[256];	// if > 1, it is autorepeating
-qboolean	keydown[256];
+char	*keybindings[K_MAX_KEYS];
+qboolean	consolekeys[K_MAX_KEYS];	// if true, can't be rebound while in console
+qboolean	menubound[K_MAX_KEYS];	// if true, can't be rebound while in menu
+int		keyshift[K_MAX_KEYS];		// key to map to if shift held down in console
+int		key_repeats[K_MAX_KEYS];	// if > 1, it is autorepeating
+qboolean	keydown[K_MAX_KEYS];
 
 typedef struct
 {
@@ -154,6 +154,30 @@ keyname_t keynames[] =
 
 	{"MWHEELUP", K_MWHEELUP },
 	{"MWHEELDOWN", K_MWHEELDOWN },
+
+	{"PAD_A", K_PAD_A},
+	{"PAD_B", K_PAD_B},
+	{"PAD_X", K_PAD_X},
+	{"PAD_Y", K_PAD_Y},
+	{"PAD_BACK", K_PAD_BACK},
+	{"PAD_GUIDE", K_PAD_GUIDE},
+	{"PAD_START", K_PAD_START},
+	{"PAD_LSTICK", K_PAD_LSTICK},
+	{"PAD_RSTICK", K_PAD_RSTICK},
+	{"PAD_LB", K_PAD_LB},
+	{"PAD_RB", K_PAD_RB},
+	{"PAD_UP", K_PAD_UP},
+	{"PAD_DOWN", K_PAD_DOWN},
+	{"PAD_LEFT", K_PAD_LEFT},
+	{"PAD_RIGHT", K_PAD_RIGHT},
+	{"PAD_MISC", K_PAD_MISC},
+	{"PAD_PADDLE1", K_PAD_PADDLE1},
+	{"PAD_PADDLE2", K_PAD_PADDLE2},
+	{"PAD_PADDLE3", K_PAD_PADDLE3},
+	{"PAD_PADDLE4", K_PAD_PADDLE4},
+	{"PAD_TOUCHPAD", K_PAD_TOUCHPAD},
+	{"PAD_LT", K_PAD_LT},
+	{"PAD_RT", K_PAD_RT},
 
 	{"PAUSE", K_PAUSE},
 
@@ -695,7 +719,7 @@ void Key_Unbindall_f (void)
 {
 	int		i;
 
-	for (i=0 ; i<256 ; i++)
+	for (i=0 ; i<K_MAX_KEYS ; i++)
 		if (keybindings[i])
 			Key_SetBinding (i, "");
 }
@@ -757,7 +781,7 @@ void Key_WriteBindings (FILE *f)
 {
 	int		i;
 
-	for (i=0 ; i<256 ; i++)
+	for (i=0 ; i<K_MAX_KEYS ; i++)
 		if (keybindings[i] && keybindings[i][0])
 			fprintf (f, "bind %s \"%s\"\n", Key_KeynumToString(i), keybindings[i]);
 }
@@ -773,7 +797,7 @@ void Key_Bindlist_f (void)
 {
 	int		i;
 
-	for (i=0 ; i<256 ; i++)
+	for (i=0 ; i<K_MAX_KEYS ; i++)
 		if (keybindings[i] && keybindings[i][0])
 			Com_Printf ("%s \"%s\"\n", Key_KeynumToString(i), keybindings[i]);
 }
@@ -835,7 +859,7 @@ void Key_Init (void)
 	consolekeys['`'] = false;
 	consolekeys['~'] = false;
 
-	for (i=0 ; i<256 ; i++)
+	for (i=0 ; i<K_MAX_KEYS ; i++)
 		keyshift[i] = i;
 	for (i='a' ; i<='z' ; i++)
 		keyshift[i] = i - 'a' + 'A';
@@ -1064,7 +1088,7 @@ void Key_ClearStates (void)
 
 	anykeydown = false;
 
-	for (i=0 ; i<256 ; i++)
+	for (i=0 ; i<K_MAX_KEYS ; i++)
 	{
 		if ( keydown[i] || key_repeats[i] )
 			Key_Event( i, false, 0 );
