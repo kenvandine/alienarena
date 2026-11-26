@@ -774,6 +774,50 @@
 
 <p>Look-spring tuning.</p>
 
+<h3>Controller CVARs</h3>
+
+<p>Game controllers on Linux, read with SDL2 when the game is built with it (<code>--with-sdl2</code>). Buttons and triggers are keys named <code>PAD_A</code>, <code>PAD_B</code>, <code>PAD_X</code>, <code>PAD_Y</code>, <code>PAD_LB</code>, <code>PAD_RB</code>, <code>PAD_LT</code>, <code>PAD_RT</code>, <code>PAD_BACK</code>, <code>PAD_START</code>, <code>PAD_GUIDE</code>, <code>PAD_LSTICK</code>, <code>PAD_RSTICK</code>, <code>PAD_UP</code>, <code>PAD_DOWN</code>, <code>PAD_LEFT</code>, <code>PAD_RIGHT</code>, <code>PAD_MISC</code>, <code>PAD_PADDLE1</code> to <code>PAD_PADDLE4</code> and <code>PAD_TOUCHPAD</code>, bound with <code>bind</code> like any other key. <code>PAD_START</code> works like Escape and can't be rebound. The left stick moves and the right stick looks. To fix the layout of an unusual controller, put an SDL mapping file named <code>gamecontrollerdb.txt</code> in your game folder.</p>
+
+<p><strong>in_gamepad</strong>: BOOL (default: 1)</p>
+
+<p>Use game controllers.</p>
+
+<p><strong>pad_sensitivity</strong>: FLOAT (default: 1)</p>
+
+<p>Controller look speed multiplier.</p>
+
+<p><strong>pad_yawspeed</strong>: FLOAT (default: 220)</p>
+
+<p>Degrees per second the right stick turns at full tilt.</p>
+
+<p><strong>pad_pitchspeed</strong>: FLOAT (default: 160)</p>
+
+<p>Degrees per second the right stick looks up or down at full tilt.</p>
+
+<p><strong>pad_invert</strong>: BOOL (default: 0)</p>
+
+<p>Invert looking up and down with the right stick.</p>
+
+<p><strong>pad_lookexpo</strong>: FLOAT (default: 2)</p>
+
+<p>Right stick response curve. 1 is linear; higher values aim more finely near the middle and turn as fast at full tilt.</p>
+
+<p><strong>pad_deadzone_move</strong>, <strong>pad_deadzone_look</strong>: FLOAT (default: 0.20, 0.15)</p>
+
+<p>Left and right stick deadzones, from 0 to 0.9.</p>
+
+<p><strong>pad_movesnap</strong>: FLOAT (default: 0.25)</p>
+
+<p>Move straight along one axis when the left stick's other axis is this small in comparison, so that double flicks dodge.</p>
+
+<p><strong>pad_trigger</strong>: FLOAT (default: 0.30)</p>
+
+<p>How far a trigger goes down before it counts as pressed.</p>
+
+<p><strong>pad_debug</strong>: BOOL (default: 0)</p>
+
+<p>Print the sticks and the moves they make.</p>
+
 <h3>Debug CVARs (client)</h3>
 
 <p><strong>cl_stats</strong>, <strong>cl_testblend</strong>, <strong>cl_testentities</strong>, <strong>cl_testlights</strong>, <strong>cl_testparticles</strong>: BOOL (default: 0)</p>

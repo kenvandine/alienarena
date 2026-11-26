@@ -177,6 +177,9 @@
    and to 0 otherwise. */
 #undef HAVE_REALLOC
 
+/* Enable game controller support with SDL2 */
+#undef HAVE_SDL2
+
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
 

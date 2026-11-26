@@ -629,6 +629,8 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 ALLOCA
 LIBOBJS
+USE_SDL2_FALSE
+USE_SDL2_TRUE
 USE_SYSTEM_LIBODE_FALSE
 USE_SYSTEM_LIBODE_TRUE
 ODE_LIBS
@@ -641,6 +643,8 @@ OGG_LIBS
 OGG_CFLAGS
 LIBCURL_LIBS
 LIBCURL_CFLAGS
+SDL2_LIBS
+SDL2_CFLAGS
 ZLIB_LIBS
 ZLIB_CFLAGS
 XXF86DGA_LIBS
@@ -788,6 +792,7 @@ with_system_libode
 with_xf86vm
 with_xf86dga
 with_zlib
+with_sdl2
 enable_assert
 enable_build_status
 '
@@ -815,6 +820,8 @@ XXF86DGA_CFLAGS
 XXF86DGA_LIBS
 ZLIB_CFLAGS
 ZLIB_LIBS
+SDL2_CFLAGS
+SDL2_LIBS
 LIBCURL_CFLAGS
 LIBCURL_LIBS
 OGG_CFLAGS
@@ -1483,6 +1490,8 @@ Optional Packages:
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: without)
   --with(out)-zlib        include Zlib compression support (default: check)
+  --with(out)-sdl2        include game controller support with SDL2 (default:
+                          check)
 
 Some influential environment variables:
   CC          C compiler command
@@ -1513,6 +1522,8 @@ Some influential environment variables:
               linker flags for XXF86DGA, overriding pkg-config
   ZLIB_CFLAGS C compiler flags for ZLIB, overriding pkg-config
   ZLIB_LIBS   linker flags for ZLIB, overriding pkg-config
+  SDL2_CFLAGS C compiler flags for SDL2, overriding pkg-config
+  SDL2_LIBS   linker flags for SDL2, overriding pkg-config
   LIBCURL_CFLAGS
               C compiler flags for LIBCURL, overriding pkg-config
   LIBCURL_LIBS
@@ -6840,6 +6851,116 @@ fi
 
 fi
 
+
+# Check whether --with-sdl2 was given.
+if test "${with_sdl2+set}" = set; then :
+  withval=$with_sdl2;
+else
+  with_sdl2=check
+fi
+
+have_sdl2=no
+if  test "x${with_sdl2}" != xno ; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sdl2 >= 2.0.10" >&5
+$as_echo_n "checking for sdl2 >= 2.0.10... " >&6; }
+
+if test -n "$SDL2_CFLAGS"; then
+    pkg_cv_SDL2_CFLAGS="$SDL2_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"sdl2 >= 2.0.10\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "sdl2 >= 2.0.10") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_SDL2_CFLAGS=`$PKG_CONFIG --cflags "sdl2 >= 2.0.10" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$SDL2_LIBS"; then
+    pkg_cv_SDL2_LIBS="$SDL2_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"sdl2 >= 2.0.10\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "sdl2 >= 2.0.10") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_SDL2_LIBS=`$PKG_CONFIG --libs "sdl2 >= 2.0.10" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        SDL2_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "sdl2 >= 2.0.10" 2>&1`
+        else
+	        SDL2_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "sdl2 >= 2.0.10" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$SDL2_PKG_ERRORS" >&5
+
+
+		have_sdl2=no
+		if  test "x${with_sdl2}" = xyes ; then :
+
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "--with-sdl2 specified, library or headers not found
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+		have_sdl2=no
+		if  test "x${with_sdl2}" = xyes ; then :
+
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "--with-sdl2 specified, library or headers not found
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+
+else
+	SDL2_CFLAGS=$pkg_cv_SDL2_CFLAGS
+	SDL2_LIBS=$pkg_cv_SDL2_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+		have_sdl2=yes
+
+$as_echo "#define HAVE_SDL2 1" >>confdefs.h
+
+
+fi
+
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
 $as_echo_n "checking for library containing jpeg_read_header... " >&6; }
 if ${ac_cv_search_jpeg_read_header+:} false; then :
@@ -8012,6 +8133,14 @@ else
   USE_SYSTEM_LIBODE_FALSE=
 fi
 
+ if  test "x${have_sdl2}" = xyes ; then
+  USE_SDL2_TRUE=
+  USE_SDL2_FALSE='#'
+else
+  USE_SDL2_TRUE='#'
+  USE_SDL2_FALSE=
+fi
+
 
 
 #
@@ -9157,6 +9286,10 @@ if test -z "${USE_SYSTEM_LIBODE_TRUE}" && test -z "${USE_SYSTEM_LIBODE_FALSE}"; 
   as_fn_error $? "conditional \"USE_SYSTEM_LIBODE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${USE_SDL2_TRUE}" && test -z "${USE_SDL2_FALSE}"; then
+  as_fn_error $? "conditional \"USE_SDL2\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0
@@ -9554,7 +9687,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 # report actual input values of CONFIG_FILES etc. instead of their
 # values after options handling.
 ac_log="
-This file was extended by alienarena $as_me 7.72, which was
+This file was extended by alienarena $as_me 7.72.4, which was
 generated by GNU Autoconf 2.69.  Invocation command line was
 
   CONFIG_FILES    = $CONFIG_FILES
@@ -9620,7 +9753,7 @@ _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 ac_cs_config="`$as_echo "$ac_configure_args" | sed 's/^ //; s/[\\""\`\$]/\\\\&/g'`"
 ac_cs_version="\\
-alienarena config.status 7.72
+alienarena config.status 7.72.4
 configured by $0, generated by GNU Autoconf 2.69,
   with options \\"\$ac_cs_config\\"
 
@@ -10657,6 +10790,7 @@ fi
 		$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
 		$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
 		$as_echo " Zlib support: .......... ${have_zlib}"
+		$as_echo " Game controllers: ...... ${have_sdl2}"
 		if  test "x${unix_host}" = xdarwin ; then :
 
 			$as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"
