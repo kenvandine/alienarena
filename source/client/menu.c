@@ -1518,6 +1518,16 @@ char *bindnames[][2] =
 #define num_bindable_actions static_array_size(bindnames)
 
 static int		bind_grab;
+static qboolean	bind_pad;	// the screen binds game controller buttons, not keys
+
+// is the key of the kind the binding screen shows: game controller buttons,
+// or the keyboard and mouse
+static qboolean M_KeyOnScreen (int key)
+{
+	if (bind_pad)
+		return key >= K_PAD_A;
+	return key < K_PAD_A;
+}
 
 static menuframework_s	s_keys_screen;
 static menuframework_s	s_keys_menu;
@@ -1534,7 +1544,7 @@ static void M_UnbindCommand (const char *command)
 	for (j=0 ; j<K_MAX_KEYS ; j++)
 	{
 		b = keybindings[j];
-		if (!b)
+		if (!b || !M_KeyOnScreen (j))
 
 			continue;
 		if (!strncmp (b, command, l) )
@@ -1554,7 +1564,7 @@ static void M_FindKeysForCommand (const char *command, int *twokeys)
 	for (j=0 ; j<K_MAX_KEYS ; j++)
 	{
 		b = keybindings[j];
-		if (!b)
+		if (!b || !M_KeyOnScreen (j))
 			continue;
 		if (!Q_strcasecmp (b, command) )
 		{
@@ -1628,14 +1638,25 @@ static void KeyBindingFunc( void *_self )
 
 	bind_grab = true;
 
-	Menu_SetStatusBar( &s_keys_menu, "press a key or button for this action" );
+	if (bind_pad)
+		Menu_SetStatusBar( &s_keys_menu, "press a button for this action, start to cancel" );
+	else
+		Menu_SetStatusBar( &s_keys_menu, "press a key or button for this action" );
+}
+
+static void Keys_SetStatusBar (void)
+{
+	if (bind_pad)
+		Menu_SetStatusBar( &s_keys_menu, "A to change, X to clear, B to go back" );
+	else
+		Menu_SetStatusBar( &s_keys_menu, "enter to change, backspace to clear" );
 }
 
 static void Keys_MenuInit( void )
 {
 	unsigned int i;
 
-	setup_window (s_keys_screen, s_keys_menu, "CUSTOMIZE CONTROLS");
+	setup_window (s_keys_screen, s_keys_menu, bind_pad ? "CONTROLLER BINDINGS" : "CUSTOMIZE CONTROLS");
 	
 	for (i = 0; i < num_bindable_actions; i++)
 	{
@@ -1648,7 +1669,7 @@ static void Keys_MenuInit( void )
 		Menu_AddItem( &s_keys_menu, &s_keys_actions[i]);
 	}
 
-	Menu_SetStatusBar( &s_keys_menu, "enter to change, backspace to clear" );
+	Keys_SetStatusBar ();
 	
 	s_keys_menu.maxlines = 30;
 }
@@ -1659,6 +1680,10 @@ static const char *Keys_MenuKey (menuframework_s *screen, int key)
 
 	if ( bind_grab && !(cursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
 	{
+		// keys of the other kind don't bind here; escape (or start) cancels
+		if ( key != K_ESCAPE && key != '`' && !M_KeyOnScreen (key) )
+			return NULL;
+
 		if ( key != K_ESCAPE && key != '`' )
 		{
 			char cmd[1024];
@@ -1672,7 +1697,7 @@ static const char *Keys_MenuKey (menuframework_s *screen, int key)
 		if (key==K_MOUSE1)
 			cursor.buttonclicks[MOUSEBUTTON1] = -1;
 
-		Menu_SetStatusBar (&s_keys_menu, "enter to change, backspace to clear");
+		Keys_SetStatusBar ();
 		bind_grab = false;
 		
 		Menu_AutoArrange (screen);
@@ -1694,9 +1719,20 @@ static const char *Keys_MenuKey (menuframework_s *screen, int key)
 
 void M_Menu_Keys_f (void)
 {
+	bind_pad = false;
 	Keys_MenuInit();
 	M_PushMenu (Screen_Draw, Keys_MenuKey, &s_keys_screen);
 }
+
+#ifdef HAVE_SDL2
+// the same actions as Key Bindings, bound to game controller buttons
+static void M_Menu_PadKeys_f (void)
+{
+	bind_pad = true;
+	Keys_MenuInit();
+	M_PushMenu (Screen_Draw, Keys_MenuKey, &s_keys_screen);
+}
+#endif
 
 /*
 =======================================================================
@@ -3116,6 +3152,13 @@ static const char *slowfast_names[] =
 	0
 };
 
+#ifdef HAVE_SDL2
+static sliderlimit_t padspeed_limits =
+{
+	1, 30, 0.1f, 3.0f
+};
+#endif
+
 option_name_t input_option_names[] = 
 {
 	{
@@ -3139,6 +3182,7 @@ option_name_t input_option_names[] =
 		NULL,
 		setnames (onoff_names)
 	},
+#if defined WIN32_VARIANT
 	{
 		option_spincontrol,
 		"in_joystick",
@@ -3146,6 +3190,30 @@ option_name_t input_option_names[] =
 		NULL,
 		setnames (onoff_names)
 	},
+#endif
+#ifdef HAVE_SDL2
+	{
+		option_spincontrol,
+		"in_gamepad",
+		"use controller",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_slider,
+		"pad_sensitivity",
+		"controller look speed",
+		NULL,
+		setlimits (padspeed_limits)
+	},
+	{
+		option_spincontrol,
+		"pad_invert",
+		"invert controller look",
+		NULL,
+		setnames (onoff_names)
+	},
+#endif
 	{
 		option_spincontrol,
 		"cl_run",
@@ -3169,6 +3237,13 @@ static void CustomizeControlsFunc (UNUSED void *unused)
 	M_Menu_Keys_f ();
 }
 
+#ifdef HAVE_SDL2
+static void ControllerBindingsFunc (UNUSED void *unused)
+{
+	M_Menu_PadKeys_f ();
+}
+#endif
+
 static void M_Menu_Input_f (void)
 {
 	options_menu (input, "INPUT OPTIONS");
@@ -3185,6 +3260,9 @@ static void M_Menu_Input_f (void)
 	add_text (input.window, NULL, 0); //spacer
 	
 	add_action (input.window, "Key Bindings", CustomizeControlsFunc, 0);
+#ifdef HAVE_SDL2
+	add_action (input.window, "Controller Bindings", ControllerBindingsFunc, 0);
+#endif
 	
 	M_PushMenu_Defaults (input.screen);
 }

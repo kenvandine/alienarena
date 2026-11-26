@@ -486,6 +486,70 @@ ENGINE INTERFACE
 ==============================================================================
 */
 
+static const char *Pad_TypeName (SDL_GameController *controller)
+{
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+	switch (SDL_GameControllerGetType (controller))
+	{
+	case SDL_CONTROLLER_TYPE_XBOX360:				return "Xbox 360";
+	case SDL_CONTROLLER_TYPE_XBOXONE:				return "Xbox One";
+	case SDL_CONTROLLER_TYPE_PS3:					return "PlayStation 3";
+	case SDL_CONTROLLER_TYPE_PS4:					return "PlayStation 4";
+	case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO:	return "Switch Pro";
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+	case SDL_CONTROLLER_TYPE_PS5:					return "PlayStation 5";
+	case SDL_CONTROLLER_TYPE_VIRTUAL:				return "virtual";
+#endif
+	default:										break;
+	}
+#endif
+	return "other";
+}
+
+/*
+===========
+Pad_Info_f
+
+Lists the connected controllers, for bug reports.
+===========
+*/
+static void Pad_Info_f (void)
+{
+	SDL_GameController	*controller;
+	char				guid[64];
+	char				*mapping;
+	int					slot, count = 0;
+
+	if (!pad_started)
+	{
+		Com_Printf ("Game controllers are unavailable.\n");
+		return;
+	}
+
+	for (slot = 0; slot < MAX_PADS; slot++)
+	{
+		controller = pads[slot].controller;
+		if (!controller)
+			continue;
+		count++;
+
+		SDL_JoystickGetGUIDString (SDL_JoystickGetGUID (SDL_GameControllerGetJoystick (controller)),
+			guid, sizeof(guid));
+		Com_Printf ("%d: %s%s\n", slot + 1, pads[slot].name,
+			slot == active_pad ? " (moves the player)" : "");
+		Com_Printf ("   type: %s, GUID: %s\n", Pad_TypeName (controller), guid);
+		mapping = SDL_GameControllerMapping (controller);
+		Com_Printf ("   mapping: %s\n", mapping ? mapping : "none");
+		if (mapping)
+			SDL_free (mapping);
+	}
+
+	if (!count)
+		Com_Printf ("No game controllers are connected.\n");
+	if (!in_gamepad->integer)
+		Com_Printf ("Game controllers are off: set in_gamepad to 1 to use them.\n");
+}
+
 void IN_Pad_Init (void)
 {
 	char	path[MAX_OSPATH];
@@ -517,6 +581,8 @@ void IN_Pad_Init (void)
 	if (pad_started)
 		return;
 
+	Cmd_AddCommand ("padinfo", Pad_Info_f);
+
 	SDL_SetHint (SDL_HINT_NO_SIGNAL_HANDLERS, "1");
 	// there is no SDL window, so the game decides itself when it has focus
 	SDL_SetHint (SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
@@ -544,6 +610,8 @@ void IN_Pad_Init (void)
 void IN_Pad_Shutdown (void)
 {
 	int		slot;
+
+	Cmd_RemoveCommand ("padinfo");
 
 	if (!pad_started)
 		return;

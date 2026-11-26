@@ -118,6 +118,10 @@ Remove all key bindings.
 
 List all current key bindings.
 
+**padinfo**
+
+List the connected game controllers with their type, GUID and SDL mapping, for bug reports. (Linux, when built with SDL2.)
+
 **joy_advancedupdate**
 
 (Windows) Apply the advanced joystick settings (`joy_adv*` cvars).
